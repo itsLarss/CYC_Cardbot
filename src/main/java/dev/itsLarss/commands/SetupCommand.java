@@ -139,8 +139,7 @@ public class SetupCommand extends ListenerAdapter {
                                     "• In normalen Channels werden nur SFW-Karten gezeigt\n" +
                                     "• Du musst einen Channel als NSFW markieren (Channel-Einstellungen)\n\n" +
                                     "🔒 **Sicherheit:**\n" +
-                                    "• Minderjährige können keine NSFW-Inhalte sehen\n" +
-                                    "• Discord-konform & sicher"
+                                    "• Minderjährige können keine NSFW-Inhalte sehen\n"
                     )
                     .setColor(0xFF0000)
                     .setFooter("Stelle sicher dass dein Server Discord's NSFW-Regeln befolgt!");

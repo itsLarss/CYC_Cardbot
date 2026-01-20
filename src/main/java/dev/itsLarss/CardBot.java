@@ -3,6 +3,7 @@ package dev.itsLarss;
 import dev.itsLarss.commands.*;
 import dev.itsLarss.database.DatabaseManager;
 import dev.itsLarss.database.ServerSettingsManager;
+import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -12,9 +13,17 @@ public class CardBot {
 
     private static JDA jda;
     private static DatabaseManager database;
+    private static ServerSettingsManager serverSettings;
+    private final Dotenv config;
+
+    public CardBot(Dotenv config) {
+        this.config = config;
+    }
+
 
     public static void main(String[] args) {
-        String token = "";
+        Dotenv config = Dotenv.configure().load();
+        String token = config.get("TOKEN");
 
         try {
             // Initialisiere Datenbank
@@ -22,7 +31,7 @@ public class CardBot {
             database.initialize();
 
             // Initialisiere Server Settings Manager (nach Database!)
-            //serverSettings = new ServerSettingsManager(database.getConnection());
+            serverSettings = new ServerSettingsManager(database.getConnection());
 
             // Erstelle JDA Instanz
             jda = JDABuilder.createDefault(token)

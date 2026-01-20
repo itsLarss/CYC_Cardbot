@@ -28,6 +28,26 @@ public class CardRegistry {
                 "YM08", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/SFW_Charakter/Yae_Miko/Yae_Miko_YM08.png");
         registerCard(9, "Yae Miko - YM09", CardRarity.RARE,
                 "YM09", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/SFW_Charakter/Yae_Miko/Yae_Miko_YM09.png");
+        registerCard(10, "Yae Miko - YM10", CardRarity.RARE,
+                "YM10", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM10.png");
+        registerCard(11, "Yae Miko - YM11", CardRarity.RARE,
+                "YM11", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM11.png");
+        registerCard(12, "Yae Miko - YM12", CardRarity.RARE,
+                "YM12", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM12.png");
+        registerCard(13, "Yae Miko - YM13", CardRarity.RARE,
+                "YM13", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM13.png");
+        registerCard(14, "Yae Miko - YM14", CardRarity.RARE,
+                "YM14", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM14.png");
+        registerCard(15, "Yae Miko - YM15", CardRarity.RARE,
+                "YM15", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM15.png");
+        registerCard(16, "Yae Miko - YM16", CardRarity.RARE,
+                "YM16", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM16.png");
+        registerCard(17, "Yae Miko - YM17", CardRarity.RARE,
+                "YM17", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM17.png");
+        registerCard(18, "Yae Miko - YM18", CardRarity.RARE,
+                "YM18", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM18.png");
+        registerCard(19, "Yae Miko - YM19", CardRarity.RARE,
+                "YM19", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM19.png");
 
         registerCard(101, "Mualani - MU01", CardRarity.COMMON,
                 "MU01", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/SFW_Charakter/Mualani/Mualani_MU01.png");

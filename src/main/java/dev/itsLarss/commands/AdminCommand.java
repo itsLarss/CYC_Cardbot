@@ -30,7 +30,7 @@ import java.util.Map;
 public class AdminCommand extends ListenerAdapter {
 
     // WICHTIG: Hier deine Discord User-ID eintragen!
-    private static final String BOT_OWNER_ID = "DEINE_USER_ID_HIER"; // ← ERSETZEN!
+    private static final String BOT_OWNER_ID = "768110753106231316"; // ← ERSETZEN!
 
     // Speichert Lösch-Anfragen: MessageID -> DeleteRequest
     private static Map<String, DeleteRequest> activeRequests = new HashMap<>();
