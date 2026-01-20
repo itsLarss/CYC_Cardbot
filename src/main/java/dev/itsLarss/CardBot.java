@@ -14,7 +14,7 @@ public class CardBot {
     private static DatabaseManager database;
 
     public static void main(String[] args) {
-        String token = "MTQ2MjQ1MDg3MjQ5MDUyODgyMA.GGRWc8.pEJDbLuGrL-hun6r3LRnjArM9MokpVMxL-uH7A";
+        String token = "";
 
         try {
             // Initialisiere Datenbank
