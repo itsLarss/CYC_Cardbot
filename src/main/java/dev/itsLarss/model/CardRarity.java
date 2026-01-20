@@ -3,62 +3,60 @@ package dev.itsLarss.model;
 import java.awt.Color;
 
 public enum CardRarity {
+    // SFW Rarities
+    COMMON("Common", "⚪", 0x95A5A6, 10, false),
+    UNCOMMON("Uncommon", "🟢", 0x2ECC71, 25, false),
+    RARE("Rare", "🔵", 0x3498DB, 50, false),
+    EPIC("Epic", "🟣", 0x9B59B6, 100, false),
+    LEGENDARY("Legendary", "🟠", 0xE67E22, 250, false),
+    MYTHIC("Mythic", "🟡", 0xF1C40F, 500, false),
 
-    COMMON("Common", 50.0, Color.decode("#9E9E9E"), "⚪"), //NSFW & SFW Charakter cards
-    UNCOMMON("Uncommon", 25.0, Color.decode("#4CAF50"), "🟢"), //NSFW & SFW Charakter cards
-    RARE("Rare", 15.0, Color.decode("#2196F3"), "🔵"), // nothing yet
-    EPIC("Epic", 7.0, Color.decode("#9C27B0"), "🟣"), // nothing yet
-    LEGENDARY("Legendary", 2.5, Color.decode("#FF9800"), "🟠"), //Special Cards
-    MYTHIC("Mythic", 0.5, Color.decode("#FFD700"), "🟡"); //Super Special Cards
+    // NSFW Rarities (separate!)
+    NSFW_COMMON("NSFW Common", "🔞⚪", 0xFF1493, 35, true),
+    NSFW_UNCOMMON("NSFW Uncommon", "🔞🟢", 0xFF1493, 50, true),
+    NSFW_RARE("NSFW Rare", "🔞🔵", 0xFF1493, 75, true),
+    NSFW_EPIC("NSFW Epic", "🔞🟣", 0xFF69B4, 150, true),
+    NSFW_LEGENDARY("NSFW Legendary", "🔞🟠", 0xFF1493, 300, true),
+    NSFW_MYTHIC("NSFW Mythic", "🔞🟡", 0xFF0080, 600, true);
 
     private final String name;
-    private final double dropChance;
-    private final Color color;
     private final String emoji;
+    private final int color;
+    private final int sellValue;
+    private final boolean nsfw;
 
-    CardRarity(String name, double dropChance, Color color, String emoji) {
+    CardRarity(String name, String emoji, int color, int sellValue, boolean nsfw) {
         this.name = name;
-        this.dropChance = dropChance;
-        this.color = color;
         this.emoji = emoji;
+        this.color = color;
+        this.sellValue = sellValue;
+        this.nsfw = nsfw;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getDropChance() {
-        return dropChance;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
     public String getEmoji() {
         return emoji;
     }
 
-    public int getSellPrice() {
-        switch (this) {
-            case COMMON: return 5;
-            case UNCOMMON: return 15;
-            case RARE: return 40;
-            case EPIC: return 100;
-            case LEGENDARY: return 300;
-            case MYTHIC: return 1000;
-            default: return 5;
-        }
+    public int getColor() {
+        return color;
+    }
+
+    public int getSellValue() {
+        return sellValue;
+    }
+
+    public boolean isNSFW() {
+        return nsfw;
     }
 
     /**
-     * Gibt die Gesamtwahrscheinlichkeit aller Seltenheiten zurück
+     * Prüft ob diese Seltenheit SFW ist
      */
-    public static double getTotalChance() {
-        double total = 0;
-        for (CardRarity rarity : values()) {
-            total += rarity.dropChance;
-        }
-        return total;
+    public boolean isSFW() {
+        return !nsfw;
     }
 }

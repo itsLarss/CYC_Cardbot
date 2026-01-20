@@ -2,10 +2,11 @@ package dev.itsLarss.model;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class CardRegistry {
 
-    private static final Map<Integer, Card> CARDS = new HashMap<>();
+    private static final Map<Integer, Card> cards = new HashMap<>();
 
     static {
 
@@ -28,25 +29,25 @@ public class CardRegistry {
                 "YM08", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/SFW_Charakter/Yae_Miko/Yae_Miko_YM08.png");
         registerCard(9, "Yae Miko - YM09", CardRarity.RARE,
                 "YM09", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/SFW_Charakter/Yae_Miko/Yae_Miko_YM09.png");
-        registerCard(10, "Yae Miko - YM10", CardRarity.RARE,
+        registerCard(10, "Yae Miko - YM10", CardRarity.NSFW_COMMON,
                 "YM10", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM10.png");
-        registerCard(11, "Yae Miko - YM11", CardRarity.RARE,
+        registerCard(11, "Yae Miko - YM11", CardRarity.NSFW_COMMON,
                 "YM11", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM11.png");
-        registerCard(12, "Yae Miko - YM12", CardRarity.RARE,
+        registerCard(12, "Yae Miko - YM12", CardRarity.NSFW_UNCOMMON,
                 "YM12", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM12.png");
-        registerCard(13, "Yae Miko - YM13", CardRarity.RARE,
+        registerCard(13, "Yae Miko - YM13", CardRarity.NSFW_RARE,
                 "YM13", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM13.png");
-        registerCard(14, "Yae Miko - YM14", CardRarity.RARE,
+        registerCard(14, "Yae Miko - YM14", CardRarity.NSFW_UNCOMMON,
                 "YM14", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM14.png");
-        registerCard(15, "Yae Miko - YM15", CardRarity.RARE,
+        registerCard(15, "Yae Miko - YM15", CardRarity.NSFW_RARE,
                 "YM15", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM15.png");
-        registerCard(16, "Yae Miko - YM16", CardRarity.RARE,
+        registerCard(16, "Yae Miko - YM16", CardRarity.NSFW_RARE,
                 "YM16", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM16.png");
-        registerCard(17, "Yae Miko - YM17", CardRarity.RARE,
+        registerCard(17, "Yae Miko - YM17", CardRarity.NSFW_UNCOMMON,
                 "YM17", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM17.png");
-        registerCard(18, "Yae Miko - YM18", CardRarity.RARE,
+        registerCard(18, "Yae Miko - YM18", CardRarity.NSFW_RARE,
                 "YM18", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM18.png");
-        registerCard(19, "Yae Miko - YM19", CardRarity.RARE,
+        registerCard(19, "Yae Miko - YM19", CardRarity.NSFW_RARE,
                 "YM19", "Genshin Impact","https://raw.githubusercontent.com/itsLarss/cards_img/main/CYC_Sammelkarten/NSFW_Charakter/Yae_Miko/Yae_Miko_YM19.png");
 
         registerCard(101, "Mualani - MU01", CardRarity.COMMON,
@@ -298,127 +299,105 @@ public class CardRegistry {
 
     }
 
-    private static void registerCard(int id, String name, CardRarity rarity,
-                                     String description, String series, String imageUrl) {
-        CARDS.put(id, new Card(id, name, rarity, description, series, imageUrl));
+    /**
+     * Registriert eine neue Karte
+     */
+    public static void registerCard(int id, String name, CardRarity rarity,
+                                    String description, String series, String imageUrl) {
+        cards.put(id, new Card(id, name, rarity, description, series, imageUrl));
     }
 
     /**
-     * Gibt eine Karte anhand ihrer ID zurück
+     * Registriert eine Karte ohne Bild
+     */
+    public static void registerCard(int id, String name, CardRarity rarity,
+                                    String description, String series) {
+        cards.put(id, new Card(id, name, rarity, description, series));
+    }
+
+    /**
+     * Gibt eine Karte anhand der ID zurück
      */
     public static Card getCard(int id) {
-        return CARDS.get(id);
-    }
-
-    /**
-     * Gibt eine Karte anhand ihres Namens zurück
-     */
-    public static Card getCardByName(String name) {
-        for (Card card : CARDS.values()) {
-            if (card.getName().equalsIgnoreCase(name)) {
-                return card;
-            }
-        }
-        return null;
+        return cards.get(id);
     }
 
     /**
      * Gibt alle Karten zurück
      */
     public static Collection<Card> getAllCards() {
-        return CARDS.values();
+        return cards.values();
     }
 
     /**
-     * Gibt die Gesamtanzahl der Karten zurück
+     * ⭐ NEU: Gibt nur SFW-Karten zurück
      */
-    public static int getTotalCardCount() {
-        return CARDS.size();
+    public static List<Card> getSFWCards() {
+        return cards.values().stream()
+                .filter(card -> card.getRarity().isSFW())
+                .collect(Collectors.toList());
     }
 
     /**
-     * Zieht eine zufällige Karte basierend auf Seltenheitswahrscheinlichkeiten
+     * ⭐ NEU: Gibt nur NSFW-Karten zurück
      */
-    public static Card drawRandomCard() {
-        // Gruppiere Karten nach Seltenheit
-        Map<CardRarity, List<Card>> cardsByRarity = new HashMap<>();
-        for (CardRarity rarity : CardRarity.values()) {
-            cardsByRarity.put(rarity, new ArrayList<>());
-        }
-
-        for (Card card : CARDS.values()) {
-            cardsByRarity.get(card.getRarity()).add(card);
-        }
-
-        // Ziehe zuerst die Seltenheit
-        double rand = ThreadLocalRandom.current().nextDouble(100);
-        double cumulative = 0;
-        CardRarity selectedRarity = CardRarity.COMMON;
-
-        for (CardRarity rarity : CardRarity.values()) {
-            cumulative += rarity.getDropChance();
-            if (rand <= cumulative) {
-                selectedRarity = rarity;
-                break;
-            }
-        }
-
-        // Ziehe eine zufällige Karte der gewählten Seltenheit
-        List<Card> availableCards = cardsByRarity.get(selectedRarity);
-        if (availableCards.isEmpty()) {
-            // Fallback zu Common falls keine Karten verfügbar
-            availableCards = cardsByRarity.get(CardRarity.COMMON);
-        }
-
-        int randomIndex = ThreadLocalRandom.current().nextInt(availableCards.size());
-        return availableCards.get(randomIndex);
+    public static List<Card> getNSFWCards() {
+        return cards.values().stream()
+                .filter(card -> card.getRarity().isNSFW())
+                .collect(Collectors.toList());
     }
 
     /**
-     * Zieht mehrere verschiedene Karten (keine Duplikate)
+     * ⭐ NEU: Gibt Karten basierend auf NSFW-Status zurück
      */
-    public static List<Card> drawMultipleUniqueCards(int count) {
-        List<Card> drawn = new ArrayList<>();
-        Set<Integer> drawnIds = new HashSet<>();
-
-        int attempts = 0;
-        int maxAttempts = count * 10; // Verhindere Endlosschleife
-
-        while (drawn.size() < count && attempts < maxAttempts) {
-            Card card = drawRandomCard();
-            if (!drawnIds.contains(card.getId())) {
-                drawn.add(card);
-                drawnIds.add(card.getId());
-            }
-            attempts++;
+    public static List<Card> getCardsByNSFWStatus(boolean includeNSFW) {
+        if (includeNSFW) {
+            return new ArrayList<>(cards.values());
+        } else {
+            return getSFWCards();
         }
-
-        return drawn;
     }
 
     /**
-     * Gibt alle Karten einer bestimmten Seltenheit zurück
+     * Gibt Karten nach Seltenheit zurück
      */
     public static List<Card> getCardsByRarity(CardRarity rarity) {
-        List<Card> result = new ArrayList<>();
-        for (Card card : CARDS.values()) {
-            if (card.getRarity() == rarity) {
-                result.add(card);
-            }
-        }
-        return result;
+        return cards.values().stream()
+                .filter(card -> card.getRarity() == rarity)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Gibt alle Karten einer bestimmten Serie zurück
+     * ⭐ NEU: Gibt SFW-Karten nach Seltenheit zurück
      */
-    public static List<Card> getCardsBySeries(String series) {
-        List<Card> result = new ArrayList<>();
-        for (Card card : CARDS.values()) {
-            if (card.getSeries().equalsIgnoreCase(series)) {
-                result.add(card);
-            }
-        }
-        return result;
+    public static List<Card> getSFWCardsByRarity(CardRarity rarity) {
+        return cards.values().stream()
+                .filter(card -> card.getRarity() == rarity && card.getRarity().isSFW())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gibt Anzahl aller Karten zurück
+     */
+    public static int getTotalCardCount() {
+        return cards.size();
+    }
+
+    /**
+     * ⭐ NEU: Gibt Anzahl der SFW-Karten zurück
+     */
+    public static int getSFWCardCount() {
+        return (int) cards.values().stream()
+                .filter(card -> card.getRarity().isSFW())
+                .count();
+    }
+
+    /**
+     * ⭐ NEU: Gibt Anzahl der NSFW-Karten zurück
+     */
+    public static int getNSFWCardCount() {
+        return (int) cards.values().stream()
+                .filter(card -> card.getRarity().isNSFW())
+                .count();
     }
 }

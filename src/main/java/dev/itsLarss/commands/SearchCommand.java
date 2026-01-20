@@ -2,6 +2,7 @@ package dev.itsLarss.commands;
 
 import dev.itsLarss.model.Card;
 import dev.itsLarss.model.CardRegistry;
+import dev.itsLarss.util.NSFWManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -11,19 +12,14 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Search Command - Suche nach Karten
+ * Search Command mit NSFW-Filterung und Pagination
  */
 public class SearchCommand extends ListenerAdapter {
 
     private static final int CARDS_PER_PAGE = 15;
-
-    // Speichert aktive Suchen: MessageID -> SearchSession
     private static Map<String, SearchSession> activeSessions = new HashMap<>();
 
     public CommandData getCommandData() {
@@ -51,10 +47,22 @@ public class SearchCommand extends ListenerAdapter {
             return;
         }
 
-        // Suche Karten
+        // ⭐ NSFW-Check
+        boolean isNSFW = NSFWManager.isNSFWChannel(event);
+
+        // ⭐ Nur verfügbare Karten basierend auf NSFW-Status
+        List<Card> availableCards = isNSFW
+                ? new ArrayList<>(CardRegistry.getAllCards())
+                : CardRegistry.getSFWCards();
+
         List<Card> results = new ArrayList<>();
 
-        for (Card card : CardRegistry.getAllCards()) {
+        for (Card card : availableCards) {
+            // ⭐ Doppelte Sicherheit: NSFW-Karten rausfiltern!
+            if (!isNSFW && card.getRarity().isNSFW()) {
+                continue;
+            }
+
             boolean matches = true;
 
             if (searchName != null && !card.getName().toLowerCase().contains(searchName)) {
@@ -71,12 +79,12 @@ public class SearchCommand extends ListenerAdapter {
         }
 
         if (results.isEmpty()) {
-            event.reply("📭 Keine Karten gefunden!")
+            event.reply("📭 Keine Karten gefunden!" +
+                            (!isNSFW ? "\n\n💡 **Tipp:** NSFW-Karten werden in diesem Channel nicht angezeigt." : ""))
                     .queue();
             return;
         }
 
-        // Sortiere nach Seltenheit (selten zuerst)
         results.sort((a, b) -> {
             int rarityCompare = Integer.compare(
                     b.getRarity().ordinal(),
@@ -86,15 +94,12 @@ public class SearchCommand extends ListenerAdapter {
             return a.getName().compareTo(b.getName());
         });
 
-        // Erstelle Session
-        SearchSession session = new SearchSession(results, searchName, searchSeries);
+        SearchSession session = new SearchSession(results, searchName, searchSeries, isNSFW);
 
-        // Sende erste Seite
         EmbedBuilder embed = createPageEmbed(session, 0);
         List<Button> buttons = createNavigationButtons(0, session.getTotalPages());
 
         if (buttons.isEmpty()) {
-            // Nur eine Seite - keine Buttons nötig
             event.replyEmbeds(embed.build()).queue();
         } else {
             event.replyEmbeds(embed.build())
@@ -103,10 +108,9 @@ public class SearchCommand extends ListenerAdapter {
                         message.retrieveOriginal().queue(msg -> {
                             activeSessions.put(msg.getId(), session);
 
-                            // Cleanup nach 5 Minuten
                             new Thread(() -> {
                                 try {
-                                    Thread.sleep(300000); // 5 Min
+                                    Thread.sleep(300000);
                                     activeSessions.remove(msg.getId());
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -122,8 +126,6 @@ public class SearchCommand extends ListenerAdapter {
         String buttonId = event.getComponentId();
 
         if (!buttonId.startsWith("search_page_")) return;
-
-        // Ignoriere disabled Buttons
         if (buttonId.endsWith("_disabled") || buttonId.equals("search_page_current")) {
             return;
         }
@@ -138,7 +140,6 @@ public class SearchCommand extends ListenerAdapter {
             return;
         }
 
-        // Bestimme Ziel-Seite basierend auf Button
         int currentPage = session.currentPage;
         int targetPage = currentPage;
         int totalPages = session.getTotalPages();
@@ -158,22 +159,16 @@ public class SearchCommand extends ListenerAdapter {
                 break;
         }
 
-        // Update Session
         session.currentPage = targetPage;
 
-        // Erstelle neue Seite
         EmbedBuilder embed = createPageEmbed(session, targetPage);
         List<Button> buttons = createNavigationButtons(targetPage, session.getTotalPages());
 
-        // Update Nachricht
         event.editMessageEmbeds(embed.build())
                 .setActionRow(buttons)
                 .queue();
     }
 
-    /**
-     * Erstellt das Embed für eine bestimmte Seite
-     */
     private EmbedBuilder createPageEmbed(SearchSession session, int page) {
         int startIndex = page * CARDS_PER_PAGE;
         int endIndex = Math.min(startIndex + CARDS_PER_PAGE, session.results.size());
@@ -182,9 +177,9 @@ public class SearchCommand extends ListenerAdapter {
                 .setTitle("🔍 Suchergebnisse")
                 .setColor(0x3498DB);
 
-        // Beschreibung mit Suchkriterien
         StringBuilder description = new StringBuilder();
         description.append("**Gefunden:** ").append(session.results.size()).append(" Karten\n");
+        description.append("**Modus:** ").append(session.isNSFW ? "🔞 NSFW" : "✅ SFW").append("\n");
         if (session.searchName != null) {
             description.append("**Name enthält:** ").append(session.searchName).append("\n");
         }
@@ -195,7 +190,6 @@ public class SearchCommand extends ListenerAdapter {
 
         embed.setDescription(description.toString());
 
-        // Zeige Karten für diese Seite
         List<Card> pageCards = session.results.subList(startIndex, endIndex);
 
         for (int i = 0; i < pageCards.size(); i++) {
@@ -214,51 +208,48 @@ public class SearchCommand extends ListenerAdapter {
                     card.getSeries()
             );
 
+            // ⭐ NSFW-Hinweis
+            if (card.getRarity().isNSFW()) {
+                fieldValue += "\n🔞 **NSFW (18+)**";
+            }
+
             embed.addField(fieldName, fieldValue, false);
         }
 
-        embed.setFooter("Nutze /karte <n> um Details zu sehen");
+        embed.setFooter("Nutze /karte <n> um Details zu sehen" +
+                (!session.isNSFW ? " | NSFW-Karten werden nicht angezeigt" : ""));
 
         return embed;
     }
 
-    /**
-     * Erstellt die Navigation-Buttons
-     */
     private List<Button> createNavigationButtons(int currentPage, int totalPages) {
         List<Button> buttons = new ArrayList<>();
 
-        // Nur Buttons wenn mehr als 1 Seite
         if (totalPages <= 1) {
             return buttons;
         }
 
-        // Erste Seite Button
         if (currentPage > 0) {
             buttons.add(Button.primary("search_page_first", "⏮️ Erste"));
         } else {
             buttons.add(Button.primary("search_page_first_disabled", "⏮️ Erste").asDisabled());
         }
 
-        // Vorherige Seite Button
         if (currentPage > 0) {
             buttons.add(Button.primary("search_page_prev", "◀️ Zurück"));
         } else {
             buttons.add(Button.primary("search_page_prev_disabled", "◀️ Zurück").asDisabled());
         }
 
-        // Seiten-Info (nicht klickbar)
         buttons.add(Button.secondary("search_page_current",
                 (currentPage + 1) + "/" + totalPages).asDisabled());
 
-        // Nächste Seite Button
         if (currentPage < totalPages - 1) {
             buttons.add(Button.primary("search_page_next", "▶️ Weiter"));
         } else {
             buttons.add(Button.primary("search_page_next_disabled", "▶️ Weiter").asDisabled());
         }
 
-        // Letzte Seite Button
         if (currentPage < totalPages - 1) {
             buttons.add(Button.primary("search_page_last", "⏭️ Letzte"));
         } else {
@@ -268,19 +259,18 @@ public class SearchCommand extends ListenerAdapter {
         return buttons;
     }
 
-    /**
-     * Hilfsklasse für Search-Sessions
-     */
     private static class SearchSession {
         List<Card> results;
         String searchName;
         String searchSeries;
+        boolean isNSFW;
         int currentPage;
 
-        SearchSession(List<Card> results, String searchName, String searchSeries) {
+        SearchSession(List<Card> results, String searchName, String searchSeries, boolean isNSFW) {
             this.results = results;
             this.searchName = searchName;
             this.searchSeries = searchSeries;
+            this.isNSFW = isNSFW;
             this.currentPage = 0;
         }
 

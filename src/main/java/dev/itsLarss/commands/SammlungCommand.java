@@ -3,102 +3,73 @@ package dev.itsLarss.commands;
 import dev.itsLarss.CardBot;
 import dev.itsLarss.database.DatabaseManager;
 import dev.itsLarss.model.Card;
-import dev.itsLarss.model.CardRarity;
+import dev.itsLarss.util.NSFWManager;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
-import java.util.*;
+import java.util.Map;
 
+/**
+ * Sammlung Command mit NSFW-Filterung
+ */
 public class SammlungCommand extends ListenerAdapter {
 
     public CommandData getCommandData() {
-        return Commands.slash("sammlung", "Zeige deine Kartensammlung")
-                .addOption(OptionType.USER, "user", "User dessen Sammlung du sehen möchtest", false);
+        return Commands.slash("sammlung", "Zeigt deine Kartensammlung");
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equals("sammlung")) return;
 
-        // Bestimme den Ziel-User
-        User targetUser = event.getOption("user") != null
-                ? event.getOption("user").getAsUser()
-                : event.getUser();
-
-        String userId = targetUser.getId();
+        String userId = event.getUser().getId();
         DatabaseManager db = CardBot.getDatabase();
+
+        // ⭐ NSFW-Check
+        boolean isNSFW = NSFWManager.isNSFWChannel(event);
 
         Map<Card, Integer> userCards = db.getUserCards(userId);
 
         if (userCards.isEmpty()) {
-            event.reply("📭 " + targetUser.getName() + " hat noch keine Karten gesammelt!")
+            event.reply("📭 Deine Sammlung ist leer!\nNutze `/daily` oder `/pack` um Karten zu erhalten.")
                     .queue();
             return;
         }
 
-        // Gruppiere nach Seltenheit
-        Map<CardRarity, List<Map.Entry<Card, Integer>>> cardsByRarity = new LinkedHashMap<>();
-        for (CardRarity rarity : CardRarity.values()) {
-            cardsByRarity.put(rarity, new ArrayList<>());
-        }
+        EmbedBuilder embed = new EmbedBuilder()
+                .setTitle("🎴 Deine Kartensammlung")
+                .setDescription("**Modus:** " + (isNSFW ? "🔞 NSFW" : "✅ SFW") + "\n" +
+                        (isNSFW ? "" : "*(NSFW-Karten werden nicht angezeigt)*"))
+                .setColor(0x3498DB);
 
         int totalCards = 0;
+        int hiddenNSFWCards = 0;
+
         for (Map.Entry<Card, Integer> entry : userCards.entrySet()) {
             Card card = entry.getKey();
             int quantity = entry.getValue();
-            cardsByRarity.get(card.getRarity()).add(entry);
-            totalCards += quantity;
-        }
 
-        // Erstelle Embed
-        EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("📚 " + targetUser.getName() + "'s Sammlung")
-                .setDescription("Insgesamt **" + totalCards + "** Karten | **" + userCards.size() + "** verschiedene")
-                .setColor(0x3498DB);
-
-        // Sortiere nach Seltenheit (von selten zu häufig)
-        CardRarity[] rarityOrder = {
-                CardRarity.MYTHIC, CardRarity.LEGENDARY, CardRarity.EPIC,
-                CardRarity.RARE, CardRarity.UNCOMMON, CardRarity.COMMON
-        };
-
-        for (CardRarity rarity : rarityOrder) {
-            List<Map.Entry<Card, Integer>> cards = cardsByRarity.get(rarity);
-
-            if (!cards.isEmpty()) {
-                StringBuilder cardsText = new StringBuilder();
-
-                int displayLimit = 10;
-                for (int i = 0; i < Math.min(cards.size(), displayLimit); i++) {
-                    Map.Entry<Card, Integer> entry = cards.get(i);
-                    cardsText.append("• ")
-                            .append(entry.getKey().getName())
-                            .append(" x")
-                            .append(entry.getValue())
-                            .append("\n");
-                }
-
-                if (cards.size() > displayLimit) {
-                    cardsText.append("... und ")
-                            .append(cards.size() - displayLimit)
-                            .append(" weitere\n");
-                }
-
-                embed.addField(
-                        rarity.getEmoji() + " " + rarity.getName() + " (" + cards.size() + ")",
-                        cardsText.toString(),
-                        false
-                );
+            // ⭐ Filter NSFW-Karten in SFW-Channels!
+            if (!isNSFW && card.getRarity().isNSFW()) {
+                hiddenNSFWCards += quantity;
+                continue; // NICHT anzeigen!
             }
+
+            totalCards += quantity;
+
+            String fieldName = card.getRarity().getEmoji() + " " + card.getName();
+            String fieldValue = "**" + card.getRarity().getName() + "**\n" +
+                    "Anzahl: " + quantity + "x\n" +
+                    "Wert: " + (card.getRarity().getSellValue() * quantity) + " 🪙";
+
+            embed.addField(fieldName, fieldValue, true);
         }
 
-        int coins = db.getUserCoins(userId);
-        embed.setFooter("💰 " + coins + " Coins");
+        embed.setFooter("Gesamt: " + totalCards + " Karten" +
+                (hiddenNSFWCards > 0 ? " | " + hiddenNSFWCards + " NSFW-Karten versteckt 🔞" : ""));
 
         event.replyEmbeds(embed.build()).queue();
     }
