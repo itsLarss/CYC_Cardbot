@@ -32,7 +32,7 @@ public class CardBot {
                             GatewayIntent.GUILD_MEMBERS
                     )
                     .build();
-
+            //Lol
             // Warte bis Bot bereit ist
             jda.awaitReady();
 
